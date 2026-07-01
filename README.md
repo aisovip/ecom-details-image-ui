@@ -2,7 +2,12 @@
 
 > 用一句中文描述你的产品，30 秒拿到一张专业电商图。上传参考图还能改造（保留产品本身，换场景/姿态/风格）。
 
-在线体验（已部署）：**<https://ecom-image.liangdabiao.com/>**
+[![使用 EdgeOne Makers 部署](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://console.cloud.tencent.com/edgeone/makers/new?repository-url=https%3A%2F%2Fgithub.com%2Fliangdabiao%2Fecom-details-image-ui&env=AI_GATEWAY_API_KEY&env=AI_GATEWAY_BASE_URL&env=AI_GATEWAY_MODEL&env=IMG_BASE_URL&env=IMG_API_KEY&env=IMG_MODEL&env=IMG_CHAT_MODEL&env-description=AI_GATEWAY_*%20%E2%86%92%20EdgeOne%20AI%20Gateway%20%E4%B8%BB%E8%81%8A%E5%A4%A9%20%7C%20IMG_*%20%E2%86%92%20Agnes%20AI%20%E5%9B%BE%E7%89%87%E8%AF%86%E5%88%AB%20%2B%20%E7%94%9F%E5%9B%BE)
+
+- 在线体验（已部署）：**<https://ecom-image.liangdabiao.com/>**
+- GitHub 仓库：**<https://github.com/liangdabiao/ecom-details-image-ui>**
+
+点击上面的按钮，5 分钟部署一个你自己的实例到腾讯云 EdgeOne Makers（需要先准备好 EdgeOne AI Gateway 和 Agnes AI 的密钥，详见 [环境变量](#环境变量)）。
 
 ---
 
@@ -208,7 +213,54 @@ npm run typecheck
 
 ### 部署到 EdgeOne Makers
 
+#### 方式 A：一键部署（推荐新手）
+
+点击下面的按钮，会跳转到 EdgeOne Makers 控制台并自动填好仓库地址和所需环境变量：
+
+[![使用 EdgeOne Makers 部署](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://console.cloud.tencent.com/edgeone/makers/new?repository-url=https%3A%2F%2Fgithub.com%2Fliangdabiao%2Fecom-details-image-ui&env=AI_GATEWAY_API_KEY&env=AI_GATEWAY_BASE_URL&env=AI_GATEWAY_MODEL&env=IMG_BASE_URL&env=IMG_API_KEY&env=IMG_MODEL&env=IMG_CHAT_MODEL&env-description=AI_GATEWAY_*%20%E2%86%92%20EdgeOne%20AI%20Gateway%20%E4%B8%BB%E8%81%8A%E5%A4%A9%20%7C%20IMG_*%20%E2%86%92%20Agnes%20AI%20%E5%9B%BE%E7%89%87%E8%AF%86%E5%88%AB%20%2B%20%E7%94%9F%E5%9B%BE)
+
+**部署步骤：**
+
+1. 点击按钮 → 跳转到 EdgeOne Makers 控制台（首次需要登录腾讯云账号）
+2. 仓库地址已自动填好（`liangdabiao/ecom-details-image-ui`），框架会自动识别为 `claude-agent-sdk`
+3. 在「环境变量」区填入你自己的密钥（控制台会列出 7 个变量名，必填 5 个）：
+   - `AI_GATEWAY_API_KEY` — EdgeOne AI Gateway 密钥
+   - `AI_GATEWAY_BASE_URL` — AI Gateway 入口
+   - `AI_GATEWAY_MODEL` — 默认 `@makers/deepseek-v4-flash`
+   - `IMG_BASE_URL` — Agnes 入口，填 `https://apihub.agnes-ai.com/v1`
+   - `IMG_API_KEY` — 你的 Agnes API Key（在 [Agnes 控制台](https://agnes-ai.com/) 申请）
+   - `IMG_MODEL` — 默认 `agnes-image-2.1-flash`
+   - `IMG_CHAT_MODEL` — 默认 `agnes-2.0-flash`（图片识别用）
+4. 选择部署区域（国内用户选中国大陆）
+5. 点「部署」 → 等 1-2 分钟构建完成
+6. 拿到 `*.edgeone.cool` 预览 URL，可以立即访问
+
+**建议立刻做的事：**
+- 在「域名管理」绑定自定义域名 + 部署 SSL 证书，去掉 `eo_token` 限制（详见 [FAQ](#常见问题-faq)）
+
+#### 方式 B：CLI 手动部署（推荐开发者）
+
+适合要改代码、本地预览、CI/CD 集成的场景：
+
 ```bash
+# 1. 克隆仓库
+git clone https://github.com/liangdabiao/ecom-details-image-ui.git
+cd ecom-details-image-ui
+
+# 2. 装 CLI 并登录
+npm install -g edgeone@latest
+edgeone login --site china
+
+# 3. 装依赖
+npm install
+
+# 4. 拉环境变量（在控制台先配好）
+edgeone makers env pull
+
+# 5. 本地预览
+edgeone makers dev
+
+# 6. 部署
 edgeone makers deploy --json
 ```
 
@@ -317,3 +369,7 @@ A：本项目主聊天模型是 DeepSeek（无 vision），所以 vision 必须�
 - [Agnes AI](https://agnes-ai.com/) — 多模态 AI 模型服务（图片识别 + 图片生成）
 - 原始 ecom-details-image skill 的 prompt 工程体系来自 [claudesdk-skill](https://github.com/liangdabiao/claudesdk-skill)
 - [linux.do](https://linux.do/) 社区佬友的讨论与启发
+
+---
+
+> GitHub 仓库持续维护中，欢迎 Issue / PR / Star：<https://github.com/liangdabiao/ecom-details-image-ui>
