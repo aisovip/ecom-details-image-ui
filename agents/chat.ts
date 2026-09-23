@@ -5,6 +5,7 @@ import { getStore } from "@edgeone/pages-blob";
 import { resolveModelName, collectGatewayEnv } from "./_model";
 import { createLogger, sseEvent, createSSEResponse } from "./_shared";
 import { ECOM_SYSTEM_PROMPT } from "./_skill";
+import { TEMPLATES } from "./_templates";
 
 const logger = createLogger("chat");
 
@@ -272,6 +273,34 @@ export async function onRequest(context: any) {
     name: "ecom-tools",
     tools: [
       {
+        name: "get_template",
+        description:
+          "读取电商场景模板的完整 JSON（prompt_template 结构、风格变体 variants、品类建议 category_tips、示例、anti_ai_tips）。写任何图片 Prompt 之前必须先调它取匹配到的模板，按模板结构构建 Prompt。id 形如 01-hero-image / 11-infographic。",
+        inputSchema: {
+          template_id: z
+            .string()
+            .describe(
+              "模板 id：01-hero-image / 02-lifestyle-scene / 03-flat-lay / 04-detail-macro / 05-poster-banner / 06-social-media / 07-ugc-style / 08-model-showcase / 09-before-after / 10-packaging / 11-infographic / 12-creative-concept / 13-size-spec / 14-multi-product / 15-livestream / 16-try-on-virtual / 17-exploded-view / 18-ghost-mannequin / 19-multi-angle-grid / 20-magazine-editorial / 21-seasonal-campaign / 22-luxury-atmospherics / 23-device-mockup / 24-storefront / 25-sports-campaign",
+            ),
+        },
+        handler: async (args: Record<string, unknown>) => {
+          const id = String(args.template_id ?? "").trim();
+          const json = TEMPLATES[id];
+          if (!json) {
+            return {
+              content: [
+                {
+                  type: "text" as const,
+                  text: `未找到模板 "${id}"。可用 id：${Object.keys(TEMPLATES).join(", ")}`,
+                },
+              ],
+              isError: true,
+            };
+          }
+          return { content: [{ type: "text" as const, text: json }] };
+        },
+      },
+      {
         name: "generate_image",
         description:
           "调用 Agnes Image 2.1 Flash 同步 API 生成单张电商图片。传入已应用 GPT-Image-2 全部 6 条铁律的最终英文 Prompt。工具会自动：POST 一次 → 拿到图片 URL → 下载 → 存入 Blob → 通过 SSE file_output 事件把公开 URL 推送给前端。一次只生成 1 张图。传入 imageKey 时走图生图（保留参考图构图），不传时走文生图。",
@@ -443,7 +472,7 @@ prompt 末尾固定加：preserving the original product identity, pattern, colo
         mcpServers: {
           "ecom-tools": customMcpServer,
         },
-        allowedTools: ["mcp__ecom-tools__generate_image"],
+        allowedTools: ["mcp__ecom-tools__generate_image", "mcp__ecom-tools__get_template"],
         permissionMode: "bypassPermissions",
         abortController: sig ? ({ signal: sig } as any) : undefined,
       },
